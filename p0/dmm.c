@@ -1,5 +1,5 @@
 #include <stdio.h>  // needed for size_t
-#include <unistd.h> // needed for sbrk
+#include <sys/mman.h> // needed for mmap
 #include <assert.h> // needed for asserts
 #include "dmm.h"
 
@@ -26,7 +26,7 @@ typedef struct metadata {
 static metadata_t* freelist = NULL;
 
 void* dmalloc(size_t numbytes) {
-  /* initialize through sbrk call first time */
+  /* initialize through mmap call first time */
   if(freelist == NULL) { 			
     if(!dmalloc_init())
       return NULL;
@@ -57,7 +57,7 @@ bool dmalloc_init() {
 
   size_t max_bytes = ALIGN(MAX_HEAP_SIZE);
   /* returns heap_region, which is initialized to freelist */
-  freelist = (metadata_t*) sbrk(max_bytes); 
+  freelist = (metadata_t*) mmap(NULL, max_bytes, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   /* Q: Why casting is used? i.e., why (void*)-1? */
   if (freelist == (void *)-1)
     return false;
