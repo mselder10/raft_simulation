@@ -147,8 +147,10 @@ int test_case4(double *nbytes, double *acc, int *nbytes_abs, int *acc_abs) {
 		}
 	}
 
-	//*acc = (double) (nalloc-fail)/ (double) nalloc; //acc shows the percentage of successful dmalloc
-	*acc = (double) (LOOPCNT-fail)/ (double) LOOPCNT; //acc shows the percentage of successful dmalloc/free
+	*acc = (double) (nalloc-fail)/ (double) nalloc; //acc shows the percentage of successful dmalloc
+	if (*acc < 0.005)
+		return 0;
+	// *acc = (double) (LOOPCNT-fail)/ (double) LOOPCNT; //acc shows the percentage of successful dmalloc/free
 	*acc_abs = LOOPCNT-fail;
 	return 1;
 }
