@@ -119,7 +119,7 @@ void dfree(void* ptr) {
     if(block1 == NULL){
         freelist = block0;
         block0 -> next = NULL;
-        block0 -> next = NULL;
+        block0 -> prev = NULL;
         return;
     }
 
