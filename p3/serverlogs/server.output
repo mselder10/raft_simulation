@@ -1,0 +1,30 @@
+TIME_TO_SIMULATE=10
+S1.1: Log { (1 1) }S2.1: Log { (1 1) }
+
+S3.1: Log { (1 1) }
+S3.1: switched to follower mode.
+S2.1: switched to follower mode.
+S1.1: switched to follower mode.
+S2.2: switched to candidate mode.
+S3.2: switched to candidate mode.
+S1.2: switched to candidate mode.
+S1.3: switched to follower mode.
+S1.4: switched to candidate mode.
+S2.4: switched to follower mode.
+S2.5: switched to candidate mode.
+S1.5: switched to follower mode.
+S1.6: switched to candidate mode.
+S2.7: switched to follower mode.
+S3.3: switched to follower mode.
+S1.8: switched to follower mode.
+S2.8: voted for S2.
+S3.7: voted for S2.
+S2.8: switched to leader mode.
+S1.8: voted for S3.
+S3.9: voted for S3.
+S3.9: switched to leader mode.
+S2.8: Log { (1 1) }
+S2.8: switched to follower mode.
+S1.10: switched to candidate mode.
+S2.9: voted for S1.
+S1.10: switched to leader mode.
