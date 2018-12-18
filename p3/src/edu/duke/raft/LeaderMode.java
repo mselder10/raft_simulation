@@ -1,5 +1,6 @@
 package edu.duke.raft;
 
+
 import java.util.*;
 
 public class LeaderMode extends RaftMode {
@@ -23,8 +24,7 @@ public class LeaderMode extends RaftMode {
 		}
 	}
 	private void logRepair() {
-		boolean done = false;
-		while(!done) {
+		while(true) {
 			heartbeatTimer = scheduleTimer(HEARTBEAT_INTERVAL, HEART_ID);
 			RaftResponses.setTerm(mConfig.getCurrentTerm());
 			RaftResponses.clearAppendResponses(mConfig.getCurrentTerm());
@@ -34,16 +34,17 @@ public class LeaderMode extends RaftMode {
 				for (int j = nextIndex; j <= mLog.getLastIndex(); j++) {
 					newEntries[j - nextIndex] = mLog.getEntry(j);
 				}
+				int prevIndex = nextIndex -1;
 				int prev = -1;
-				if (mLog.getEntry(nextIndex - 1) != null) {
-					prev = mLog.getEntry(nextIndex - 1).term;
+				if (mLog.getEntry(prevIndex) != null) {
+					prev = mLog.getEntry(prevIndex).term;
 				}		
-				remoteAppendEntries(i, mConfig.getCurrentTerm(), mID, nextIndex-1, prev, newEntries, mCommitIndex);
+				remoteAppendEntries(i, mConfig.getCurrentTerm(), mID, prevIndex, prev, newEntries, mCommitIndex);
 			}
+			boolean done = true;
 			int[] responses = RaftResponses.getAppendResponses(mConfig.getCurrentTerm());
-			done = true;
 			if(responses == null) {
-				break;
+				return;
 			}
 			for (int i = 1; i <= mConfig.getNumServers(); i++) {
 				if(i != mID && responses[i] != 0) {
