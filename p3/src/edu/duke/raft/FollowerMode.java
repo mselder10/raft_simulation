@@ -45,6 +45,8 @@ public class FollowerMode extends RaftMode {
 			int term = mConfig.getCurrentTerm();
 			boolean self = (mConfig.getVotedFor() == 0 || mConfig.getVotedFor() == candidateID);
 			if (candidateTerm >= term && lastLogTerm >= mLog.getLastTerm() && lastLogIndex >= mLog.getLastIndex() && self) {
+				 System.out.println("S" + mID + "." + term +
+	                        ": voted for S" + candidateID + ".");
 				mConfig.setCurrentTerm(candidateTerm, candidateID);
 				return 0;
 			}
