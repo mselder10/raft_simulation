@@ -1,4 +1,6 @@
+
 package edu.duke.raft;
+
 
 import java.util.Timer;
 
@@ -6,9 +8,9 @@ import java.util.Timer;
 public class CandidateMode extends RaftMode {
 	private Timer electionTimer;
 	private Timer pollTimer;
-	private static int ELECTION_TIMER_ID = 1;
-	private static int POLL_TIMER_ID = 2;
-	private static int POLL_FREQUENCY = 10;
+	private static final int ELECTION_TIMER_ID = 1;
+	private static final int POLL_TIMER_ID = 2;
+	private static final int POLL_FREQUENCY = 10;
 
 	public void go () {
 		synchronized (mLock) {
@@ -24,30 +26,32 @@ public class CandidateMode extends RaftMode {
 		}
 	}
 
+
+
 	private void holdElections() {
-		if (electionTimer != null) 
-			electionTimer.cancel();
-		int term = mConfig.getCurrentTerm();
-
-		long time = (long) (Math.random() * (ELECTION_TIMEOUT_MAX - ELECTION_TIMEOUT_MIN)) + ELECTION_TIMEOUT_MIN;
-		if(mConfig.getTimeoutOverride() == -1) {
-			time = mConfig.getTimeoutOverride();
+		resetElectionTimer();
+		RaftResponses.setTerm(mConfig.getCurrentTerm());
+		RaftResponses.clearVotes(mConfig.getCurrentTerm());
+		for (int i = 1; i <= mConfig.getNumServers(); i++) {
+			remoteRequestVote(i, mConfig.getCurrentTerm(), mID, mLog.getLastIndex(), mLog.getLastTerm());
 		}
-		electionTimer = scheduleTimer(time, ELECTION_TIMER_ID);
-
-		RaftResponses.setTerm(term);
-		RaftResponses.clearVotes(term);
-
-		for(int i = 1; i <= mConfig.getNumServers(); i++) {
-			remoteRequestVote(i, term, mID, mLog.getLastIndex(), mLog.getLastTerm());
-		}
-
 		pollTimer = scheduleTimer(POLL_FREQUENCY, POLL_TIMER_ID);
-	}		
+	}
 
 	private void timerStop() {
 		electionTimer.cancel();
 		pollTimer.cancel();
+	}
+
+	private void resetElectionTimer() {
+		if (electionTimer != null) {
+			electionTimer.cancel();
+		}
+		long time = (long) (Math.random() * (ELECTION_TIMEOUT_MAX - ELECTION_TIMEOUT_MIN)) + ELECTION_TIMEOUT_MIN;
+		if(mConfig.getTimeoutOverride() > 0) {
+			time = mConfig.getTimeoutOverride();
+		}
+		electionTimer = scheduleTimer(time, ELECTION_TIMER_ID);
 	}
 
 	// @param candidate’s term
@@ -114,8 +118,8 @@ public class CandidateMode extends RaftMode {
 				mConfig.setCurrentTerm(mConfig.getCurrentTerm() +1, mID);
 				holdElections();
 			} else if(timerID == POLL_TIMER_ID) {
-				int[] totalVotes;
 				pollTimer.cancel();
+				int[] totalVotes;
 				if(RaftResponses.getVotes(mConfig.getCurrentTerm()) == null) {
 					pollTimer = scheduleTimer(POLL_FREQUENCY, POLL_TIMER_ID);
 					return;
